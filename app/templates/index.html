@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Running Dashboard</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">&#9651;</span>
+      <span class="brand-name">RUN<span class="accent">DASH</span></span>
+    </div>
+    <div class="upload-area">
+      <input type="file" id="fitInput" accept=".fit" hidden>
+      <button id="uploadBtn" class="btn-primary">+ Upload FIT File</button>
+      <span id="uploadStatus" class="upload-status"></span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="summary-row" id="summaryRow"></section>
+
+    <section class="trends-grid">
+      <div class="card">
+        <h3>Avg HR Trend <span class="unit">bpm</span></h3>
+        <canvas id="avgHrChart" height="160"></canvas>
+      </div>
+      <div class="card">
+        <h3>Zone 2 % Trend <span class="unit">% of time</span></h3>
+        <canvas id="zone2Chart" height="160"></canvas>
+      </div>
+      <div class="card wide">
+        <h3>Zone Distribution Across Runs</h3>
+        <canvas id="zoneStackChart" height="140"></canvas>
+      </div>
+    </section>
+
+    <section class="runs-header">
+      <h2>Run History</h2>
+    </section>
+    <section class="runs-grid" id="runsGrid"></section>
+  </main>
+
+  <div id="runModal" class="modal hidden">
+    <div class="modal-content">
+      <button id="closeModal" class="modal-close">&times;</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    window.MAX_HR = {{ max_hr }};
+    window.ZONE_COLORS = {{ zone_colors | tojson }};
+  </script>
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>
