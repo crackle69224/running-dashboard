@@ -18,6 +18,11 @@
       <button id="uploadBtn" class="btn-primary">+ Upload FIT/ZIP Files</button>
       <span id="uploadStatus" class="upload-status"></span>
     </div>
+    <div class="user-bar">
+      <span>{{ user_email }}</span>
+      {% if is_admin %}<span class="admin-badge">ADMIN</span>{% endif %}
+      <button id="logoutBtn" class="btn-ghost">Log out</button>
+    </div>
   </header>
 
   <main class="layout">
@@ -54,6 +59,7 @@
   <script>
     window.MAX_HR = {{ max_hr }};
     window.ZONE_COLORS = {{ zone_colors | tojson }};
+    window.IS_ADMIN = {{ is_admin | tojson }};
   </script>
   <script src="/static/dashboard.js"></script>
 </body>

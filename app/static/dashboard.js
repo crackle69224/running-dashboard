@@ -1,7 +1,17 @@
 const ZONE_COLORS = window.ZONE_COLORS || ["#3a4a63", "#5b8cf7", "#46c98e", "#f5b942", "#f25c54"];
 const MAX_HR = window.MAX_HR || 196;
+const IS_ADMIN = window.IS_ADMIN || false;
 
 let charts = {};
+
+async function apiFetch(url, options) {
+  const res = await fetch(url, options);
+  if (res.status === 401) {
+    window.location.href = "/login";
+    throw new Error("Not authenticated");
+  }
+  return res;
+}
 
 function fmtDate(iso) {
   if (!iso) return "—";
@@ -20,8 +30,10 @@ function zoneSegments(run) {
 
 function runCard(run) {
   const segs = zoneSegments(run);
+  const ownerTag = (IS_ADMIN && run.owner_email) ? `<div class="owner-tag">${run.owner_email}</div>` : "";
   return `
     <div class="run-card" data-id="${run.id}">
+      ${ownerTag}
       <div class="run-date">${fmtDate(run.start_time)}</div>
       <div class="run-stats">
         <div class="metric"><div class="m-label">Distance</div><div class="m-value">${(run.distance_km ?? 0).toFixed(2)}<span style="font-size:12px;color:var(--text-dim)"> km</span></div></div>
@@ -41,7 +53,7 @@ function statBox(label, value, unit) {
 }
 
 async function loadRuns() {
-  const res = await fetch("/api/runs");
+  const res = await apiFetch("/api/runs");
   const runs = await res.json();
   const grid = document.getElementById("runsGrid");
 
@@ -77,7 +89,7 @@ function renderSummary(runs) {
 }
 
 async function loadTrends() {
-  const res = await fetch("/api/trends");
+  const res = await apiFetch("/api/trends");
   const data = await res.json();
   const labels = data.labels.map(fmtDate);
 
@@ -108,7 +120,7 @@ function renderLineChart(canvasId, labels, values, label, color) {
 }
 
 async function renderZoneStack(rawLabels) {
-  const res = await fetch("/api/runs");
+  const res = await apiFetch("/api/runs");
   const runs = (await res.json()).slice().sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
   const labels = runs.map(r => fmtDate(r.start_time));
 
@@ -147,7 +159,7 @@ function chartOptions() {
 }
 
 async function openRunModal(id) {
-  const res = await fetch(`/api/runs/${id}`);
+  const res = await apiFetch(`/api/runs/${id}`);
   const run = await res.json();
   const modal = document.getElementById("runModal");
   const body = document.getElementById("modalBody");
@@ -205,7 +217,7 @@ async function openRunModal(id) {
 
   document.getElementById("deleteRunBtn").onclick = async () => {
     if (!confirm("Delete this run permanently?")) return;
-    await fetch(`/api/runs/${id}`, { method: "DELETE" });
+    await apiFetch(`/api/runs/${id}`, { method: "DELETE" });
     modal.classList.add("hidden");
     await refreshAll();
   };
@@ -222,6 +234,11 @@ document.getElementById("uploadBtn").addEventListener("click", () => {
   document.getElementById("fitInput").click();
 });
 
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await fetch("/api/logout", { method: "POST" });
+  window.location.href = "/login";
+});
+
 document.getElementById("fitInput").addEventListener("change", async (e) => {
   const files = Array.from(e.target.files || []);
   if (files.length === 0) return;
@@ -233,7 +250,7 @@ document.getElementById("fitInput").addEventListener("change", async (e) => {
   files.forEach(f => formData.append("files", f));
 
   try {
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const res = await apiFetch("/api/upload", { method: "POST", body: formData });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Upload failed");
 

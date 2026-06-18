@@ -25,6 +25,8 @@ load_dotenv(PROJECT_ROOT / ".env")
 GARMIN_EMAIL = os.environ.get("GARMIN_EMAIL")
 GARMIN_PASSWORD = os.environ.get("GARMIN_PASSWORD")
 DASHBOARD_URL = os.environ.get("DASHBOARD_URL", "http://127.0.0.1:8000").rstrip("/")
+DASHBOARD_EMAIL = os.environ.get("DASHBOARD_EMAIL")
+DASHBOARD_PASSWORD = os.environ.get("DASHBOARD_PASSWORD")
 TOKEN_STORE = PROJECT_ROOT / ".garmin_tokens"
 SYNCED_IDS_FILE = PROJECT_ROOT / "data" / "synced_activity_ids.json"
 
@@ -68,8 +70,25 @@ RUNNING_TYPE_KEYS = {
 }
 
 
+def dashboard_session() -> requests.Session:
+    if not DASHBOARD_EMAIL or not DASHBOARD_PASSWORD:
+        print("Missing DASHBOARD_EMAIL / DASHBOARD_PASSWORD in .env", file=sys.stderr)
+        sys.exit(1)
+
+    session = requests.Session()
+    resp = session.post(
+        f"{DASHBOARD_URL}/api/login",
+        json={"email": DASHBOARD_EMAIL, "password": DASHBOARD_PASSWORD},
+    )
+    if not resp.ok:
+        print(f"Dashboard login failed: {resp.status_code} {resp.text}", file=sys.stderr)
+        sys.exit(1)
+    return session
+
+
 def main():
     client = login()
+    session = dashboard_session()
     synced = load_synced_ids()
 
     activities = client.get_activities(0, 20)
@@ -89,7 +108,7 @@ def main():
             activity_id, dl_fmt=Garmin.ActivityDownloadFormat.ORIGINAL
         )
 
-        resp = requests.post(
+        resp = session.post(
             f"{DASHBOARD_URL}/api/upload",
             files={"files": (f"{activity_id}.zip", fit_bytes, "application/zip")},
         )
