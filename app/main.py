@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from starlette.requests import Request
 
 from app import auth, db
+from app.email_utils import send_email
 from app.fit_parser import parse_fit_file
 from app.zones import MAX_HR, ZONE_COLORS
 
@@ -29,6 +30,15 @@ db.init_db()
 
 class Credentials(BaseModel):
     email: str
+    password: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
     password: str
 
 
@@ -115,6 +125,49 @@ def logout():
     response = RedirectResponse("/login", status_code=303)
     response.delete_cookie(auth.SESSION_COOKIE_NAME)
     return response
+
+
+@app.get("/forgot-password", response_class=HTMLResponse)
+def forgot_password_page(request: Request):
+    return templates.TemplateResponse("forgot_password.html", {"request": request})
+
+
+@app.get("/reset-password", response_class=HTMLResponse)
+def reset_password_page(request: Request, token: str = ""):
+    return templates.TemplateResponse("reset_password.html", {"request": request, "token": token})
+
+
+@app.post("/api/forgot-password")
+def forgot_password(req: ForgotPasswordRequest, request: Request):
+    email = req.email.strip().lower()
+    user = db.get_user_by_email(email)
+    if user:
+        token = auth.create_reset_token(user["id"], user["password_hash"])
+        reset_url = f"{str(request.base_url).rstrip('/')}/reset-password?token={token}"
+        send_email(
+            user["email"],
+            "Reset your RunDash password",
+            f"Click the link below to reset your password. This link expires in 1 hour.\n\n{reset_url}\n\n"
+            "If you didn't request this, you can ignore this email.",
+        )
+    # Always return success, whether or not the email exists, so we don't leak which emails are registered.
+    return {"message": "If an account with that email exists, a reset link has been sent."}
+
+
+@app.post("/api/reset-password")
+def reset_password(req: ResetPasswordRequest):
+    data = auth.decode_reset_token(req.token)
+    if not data:
+        raise HTTPException(400, "This reset link is invalid or has expired")
+
+    user = db.get_user_by_id(data["user_id"])
+    if not user or user["password_hash"] != data["password_hash"]:
+        raise HTTPException(400, "This reset link has already been used or is no longer valid")
+    if len(req.password) < 8:
+        raise HTTPException(400, "Password must be at least 8 characters")
+
+    db.update_password(user["id"], auth.hash_password(req.password))
+    return {"message": "Password updated. You can now log in."}
 
 
 @app.get("/api/me")

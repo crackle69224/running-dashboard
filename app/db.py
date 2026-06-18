@@ -82,6 +82,11 @@ def get_user_by_id(user_id: int) -> dict | None:
         return dict(row) if row else None
 
 
+def update_password(user_id: int, password_hash: str) -> None:
+    with get_conn() as conn:
+        conn.execute("UPDATE users SET password_hash = %s WHERE id = %s", (password_hash, user_id))
+
+
 def any_users_exist() -> bool:
     with get_conn() as conn:
         row = conn.execute("SELECT 1 FROM users LIMIT 1").fetchone()
