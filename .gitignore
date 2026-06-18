@@ -3,5 +3,8 @@ __pycache__/
 .venv/
 venv/
 data/runs.db
+data/synced_activity_ids.json
 *.fit
+*.zip
 .env
+.garmin_tokens/
