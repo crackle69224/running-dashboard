@@ -1,26 +1,34 @@
+import json
 import os
-import smtplib
-from email.mime.text import MIMEText
+import urllib.request
 
-SMTP_HOST = os.environ.get("SMTP_HOST")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("SMTP_USER")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
-SMTP_FROM = os.environ.get("SMTP_FROM", SMTP_USER)
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+RESEND_FROM = os.environ.get("RESEND_FROM", "RunDash <onboarding@resend.dev>")
 
 
 def send_email(to: str, subject: str, body: str) -> None:
-    if not SMTP_HOST:
-        # No SMTP configured (e.g. local dev) — log instead of sending.
+    if not RESEND_API_KEY:
+        # No email API configured (e.g. local dev) — log instead of sending.
         print(f"[email not configured] To: {to}\nSubject: {subject}\n{body}")
         return
 
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = SMTP_FROM
-    msg["To"] = to
+    payload = json.dumps({
+        "from": RESEND_FROM,
+        "to": [to],
+        "subject": subject,
+        "text": body,
+    }).encode()
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.sendmail(SMTP_FROM, [to], msg.as_string())
+    request = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=payload,
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {RESEND_API_KEY}",
+            "Content-Type": "application/json",
+            "User-Agent": "RunDash/1.0",
+        },
+    )
+    with urllib.request.urlopen(request, timeout=15) as resp:
+        if resp.status >= 300:
+            raise RuntimeError(f"Resend API returned {resp.status}: {resp.read()}")
