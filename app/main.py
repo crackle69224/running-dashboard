@@ -1,4 +1,6 @@
+import io
 import tempfile
+import zipfile
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -25,27 +27,57 @@ def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "max_hr": MAX_HR, "zone_colors": ZONE_COLORS})
 
 
-@app.post("/api/upload")
-async def upload_fit(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".fit"):
-        raise HTTPException(400, "Only .fit files are supported")
-
+def _parse_and_store(fit_bytes: bytes, filename: str) -> dict:
     with tempfile.NamedTemporaryFile(suffix=".fit", delete=False) as tmp:
-        tmp.write(await file.read())
+        tmp.write(fit_bytes)
         tmp_path = tmp.name
-
     try:
-        run_summary, records = parse_fit_file(tmp_path, file.filename)
-    except Exception as e:
-        raise HTTPException(400, f"Failed to parse FIT file: {e}")
+        run_summary, records = parse_fit_file(tmp_path, filename)
     finally:
         Path(tmp_path).unlink(missing_ok=True)
 
     if not records:
-        raise HTTPException(400, "No record data found in FIT file")
+        raise ValueError("No record data found in FIT file")
 
     run_id = db.insert_run(run_summary, records)
     return {"id": run_id, **run_summary}
+
+
+@app.post("/api/upload")
+async def upload_fit(files: list[UploadFile] = File(...)):
+    results = []
+    errors = []
+
+    for file in files:
+        name_lower = file.filename.lower()
+        content = await file.read()
+
+        if name_lower.endswith(".zip"):
+            try:
+                with zipfile.ZipFile(io.BytesIO(content)) as zf:
+                    fit_names = [n for n in zf.namelist() if n.lower().endswith(".fit")]
+                    if not fit_names:
+                        errors.append({"filename": file.filename, "error": "Zip contains no .fit file"})
+                        continue
+                    for fit_name in fit_names:
+                        try:
+                            results.append(_parse_and_store(zf.read(fit_name), fit_name))
+                        except Exception as e:
+                            errors.append({"filename": fit_name, "error": str(e)})
+            except zipfile.BadZipFile:
+                errors.append({"filename": file.filename, "error": "Invalid zip file"})
+        elif name_lower.endswith(".fit"):
+            try:
+                results.append(_parse_and_store(content, file.filename))
+            except Exception as e:
+                errors.append({"filename": file.filename, "error": str(e)})
+        else:
+            errors.append({"filename": file.filename, "error": "Only .fit or .zip files are supported"})
+
+    if not results and errors:
+        raise HTTPException(400, errors[0]["error"])
+
+    return {"uploaded": results, "errors": errors}
 
 
 @app.get("/api/runs")

@@ -223,21 +223,33 @@ document.getElementById("uploadBtn").addEventListener("click", () => {
 });
 
 document.getElementById("fitInput").addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const files = Array.from(e.target.files || []);
+  if (files.length === 0) return;
   const status = document.getElementById("uploadStatus");
-  status.textContent = "Uploading…";
+  status.textContent = `Uploading ${files.length} file(s)…`;
   status.className = "upload-status";
 
   const formData = new FormData();
-  formData.append("file", file);
+  files.forEach(f => formData.append("files", f));
 
   try {
     const res = await fetch("/api/upload", { method: "POST", body: formData });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Upload failed");
-    status.textContent = `Added run: ${data.distance_km} km`;
-    status.className = "upload-status success";
+
+    const uploaded = data.uploaded || [];
+    const errors = data.errors || [];
+
+    if (uploaded.length && !errors.length) {
+      status.textContent = `Added ${uploaded.length} run(s)`;
+      status.className = "upload-status success";
+    } else if (uploaded.length && errors.length) {
+      status.textContent = `Added ${uploaded.length} run(s), ${errors.length} failed`;
+      status.className = "upload-status error";
+    } else {
+      status.textContent = errors.map(e => e.error).join("; ") || "Upload failed";
+      status.className = "upload-status error";
+    }
     await refreshAll();
   } catch (err) {
     status.textContent = err.message;
