@@ -57,6 +57,38 @@
     </div>
   </div>
 
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-content" style="max-width:420px;">
+      <button id="closeSettingsModal" class="modal-close">&times;</button>
+
+      <div id="settingsMenu">
+        <h2 style="margin-top:0;">Settings</h2>
+        <div class="settings-menu-list">
+          <button class="settings-menu-item" id="changeProgramBtn">
+            <div class="settings-menu-title">Change running program</div>
+            <div class="settings-menu-sub">Switch between Polarized, Pyramidal, or Threshold</div>
+          </button>
+          <button class="settings-menu-item" id="changePasswordBtn">
+            <div class="settings-menu-title">Change password</div>
+            <div class="settings-menu-sub">Update your account password</div>
+          </button>
+        </div>
+      </div>
+
+      <div id="changePasswordForm" class="hidden">
+        <button id="backToSettingsMenu" class="btn-ghost" style="margin-bottom:14px;">&larr; Back</button>
+        <h2 style="margin-top:0;">Change password</h2>
+        <label style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Current password</label>
+        <input type="password" id="currentPassword" style="width:100%;margin-top:6px;margin-bottom:14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--sans);font-size:14px;">
+        <label style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">New password</label>
+        <input type="password" id="newPassword" minlength="8" style="width:100%;margin-top:6px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--sans);font-size:14px;">
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">At least 8 characters.</div>
+        <button id="savePasswordBtn" class="btn-primary" style="width:100%;margin-top:16px;">Update password</button>
+        <div id="passwordChangeMsg" style="font-size:12px;margin-top:10px;min-height:14px;"></div>
+      </div>
+    </div>
+  </div>
+
   <script>
     window.MAX_HR = {{ max_hr }};
     window.ZONE_COLORS = {{ zone_colors | tojson }};

@@ -51,6 +51,11 @@ class ModelSelection(BaseModel):
     model: str
 
 
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
 class GoalRequest(BaseModel):
     distance: str
     pace_minutes: float | None = None
@@ -237,6 +242,17 @@ def get_settings(user: dict = Depends(get_current_user)):
         "goal_pace_unit": user["goal_pace_unit"],
         "goal_days_per_week": user["goal_days_per_week"],
     }
+
+
+@app.post("/api/change-password")
+def change_password(req: ChangePasswordRequest, user: dict = Depends(get_current_user)):
+    if not auth.verify_password(req.current_password, user["password_hash"]):
+        raise HTTPException(400, "Current password is incorrect")
+    if len(req.new_password) < 8:
+        raise HTTPException(400, "New password must be at least 8 characters")
+
+    db.update_password(user["id"], auth.hash_password(req.new_password))
+    return {"message": "Password updated."}
 
 
 def _parse_and_store(fit_bytes: bytes, filename: str, user_id: int) -> dict:
