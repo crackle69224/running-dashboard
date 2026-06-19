@@ -37,6 +37,12 @@ def init_db():
             )
         """)
         conn.execute("ALTER TABLE runs ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE CASCADE")
+        conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS training_model TEXT")
+        conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS goal_distance TEXT")
+        conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS goal_pace_seconds_per_km REAL")
+        conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS goal_pace_unit TEXT")
+        conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS goal_days_per_week INTEGER")
+        conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMP")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS records (
                 id SERIAL PRIMARY KEY,
@@ -91,6 +97,28 @@ def any_users_exist() -> bool:
     with get_conn() as conn:
         row = conn.execute("SELECT 1 FROM users LIMIT 1").fetchone()
         return row is not None
+
+
+def set_training_model(user_id: int, model: str) -> None:
+    with get_conn() as conn:
+        conn.execute("UPDATE users SET training_model = %s WHERE id = %s", (model, user_id))
+
+
+def complete_onboarding(
+    user_id: int, goal_distance: str, goal_pace_seconds_per_km: float | None,
+    goal_pace_unit: str, goal_days_per_week: int,
+) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            """UPDATE users SET
+                   goal_distance = %s,
+                   goal_pace_seconds_per_km = %s,
+                   goal_pace_unit = %s,
+                   goal_days_per_week = %s,
+                   onboarding_completed_at = NOW()
+               WHERE id = %s""",
+            (goal_distance, goal_pace_seconds_per_km, goal_pace_unit, goal_days_per_week, user_id),
+        )
 
 
 def insert_run(run: dict, records: list[dict], user_id: int) -> int:

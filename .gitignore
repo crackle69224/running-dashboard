@@ -8,3 +8,4 @@ data/synced_activity_ids.json
 *.zip
 .env
 .garmin_tokens/
+scripts/sync.log

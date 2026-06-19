@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome — Zoned Running</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/onboarding.css">
+</head>
+<body class="onboarding-body">
+
+  <div class="onboarding-wrap">
+
+    <!-- Screen 1: Welcome -->
+    <section class="onb-screen active" data-screen="1">
+      <div class="onb-card onb-card-narrow">
+        <div class="brand" style="justify-content:center;margin-bottom:8px;">
+          <span class="brand-mark">&#9651;</span>
+          <span class="brand-name">RUN<span class="accent">DASH</span></span>
+        </div>
+        <h1>Welcome to Zoned Running</h1>
+        <p class="onb-body">
+          Zoned Running is built around one core idea: your heart rate is a better real-time
+          signal of training stress than pace or distance alone. Two runs at the same pace can
+          mean completely different things for your body depending on heart rate — and tracking
+          by zone helps you train the right system on the right day.
+        </p>
+        <p class="onb-body">
+          There are three main approaches researchers use to describe how training time should
+          be split across heart rate zones. Pick the one you want to follow — you can change this
+          later as your training progresses.
+        </p>
+        <button class="btn-primary onb-next" data-goto="2">Get started</button>
+      </div>
+    </section>
+
+    <!-- Screen 2: Model Selection -->
+    <section class="onb-screen" data-screen="2">
+      <div class="onb-card onb-card-wide">
+        <h1>Choose your training model</h1>
+        <p class="onb-body onb-body-tight">Select one. You can change it later from your dashboard.</p>
+
+        <div class="model-grid">
+
+          <div class="model-card" data-model="polarized">
+            <div class="model-title">Polarized</div>
+            <div class="model-tag">Mostly easy, occasionally very hard, nothing in between</div>
+            <p class="model-summary">
+              ~75-80% of training stays low intensity (Zone 1-2), ~15-20% is genuinely hard
+              (Zone 4-5), with almost no time at "moderately hard." Each run has one clear job —
+              build the aerobic base, or push the top end.
+            </p>
+            <button class="see-research" data-research="polarized">See research &#9662;</button>
+            <div class="research-panel" data-panel="polarized">
+              <p>
+                Polarized training allocates roughly 75% of training time below the lactate threshold,
+                15-20% well above it, and only about 5% to the moderate zone in between (Seiler &amp;
+                Kjerland, 2006).
+              </p>
+              <p>
+                A 2024 systematic review of 14 studies found this combination of high-volume low
+                intensity with a moderate dose of high intensity was most beneficial for improving
+                VO2max, peak oxygen uptake, and running economy in endurance athletes.
+              </p>
+              <p>
+                A controlled comparison of four training concepts found polarized training produced
+                the greatest increases in VO2peak, time-to-exhaustion, and peak power compared to
+                threshold, high-intensity-only, or high-volume training alone.
+              </p>
+              <p>
+                Mechanistically: low-intensity work drives aerobic oxidation adaptations, while
+                high-intensity work stresses the glycolytic and ATP-CP energy systems — genuinely
+                different physiological pathways. The near-empty middle zone is intentional, since
+                training there doesn't strongly stimulate either pathway.
+              </p>
+              <div class="ref-list">
+                <div>Seiler, S. &amp; Kjerland, G.&Oslash;. (2006). <em>Scandinavian Journal of Medicine &amp; Science in Sports.</em> "Quantifying training intensity distribution in elite endurance athletes."</div>
+                <div>Nøst, H.L., Aune, M.A., &amp; van den Tillaar, R. (2024). <em>Sports</em>, 12(12), 326. <a href="https://doi.org/10.3390/sports12120326" target="_blank" rel="noopener">DOI: 10.3390/sports12120326</a> — see Results section, pp. 4-7 for the VO2max/economy findings.</div>
+                <div>Stöggl, T. &amp; Sperlich, B. (2014). <em>Frontiers in Physiology</em>, 5:33. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3912323/" target="_blank" rel="noopener">PMC3912323</a> — Table 2 and Discussion (pp. 5-6) for the four-model comparison.</div>
+                <div class="ref-note">Page references are best-effort locators — exact pagination may vary by PDF version/edition.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="model-card" data-model="pyramidal">
+            <div class="model-title">Pyramidal</div>
+            <div class="model-tag">Mostly easy, a meaningful dose of moderate, a little hard</div>
+            <p class="model-summary">
+              ~75-85% Zone 1, ~10-25% Zone 2 (tempo), ~5-10% Zone 3-4. The most commonly
+              observed pattern among real elite athletes — slightly less extreme than polarized,
+              with more room for "comfortably hard" running.
+            </p>
+            <button class="see-research" data-research="pyramidal">See research &#9662;</button>
+            <div class="research-panel" data-panel="pyramidal">
+              <p>
+                The pyramidal model keeps low intensity dominant but allows more time in the moderate
+                zone than polarized training — roughly 50-75% Zone 1, 25-30% Zone 2, 5-10% Zone 3.
+              </p>
+              <p>
+                A large retrospective review of 175 documented elite training distributions found 89
+                were pyramidal, compared to 65 polarized and only 8 threshold — making pyramidal the
+                single most common real-world pattern among elite endurance athletes.
+              </p>
+              <p>
+                A direct 16-week controlled study in well-trained runners found something worth
+                knowing if you plan to train for many months: runners who trained pyramidal first and
+                then switched to polarized in the second half showed the largest improvements across
+                VO2peak, lactate thresholds, and 5K time. The sequence of models across a training
+                block may matter as much as which single model you pick.
+              </p>
+              <div class="ref-list">
+                <div>Kenneally, M., Casado, A., &amp; Santos-Concejero, J. (2018). <em>International Journal of Sports Physiology and Performance.</em> Systematic review — see comparative table, pp. 3-5.</div>
+                <div>Filipas, L. et al. (2022). <em>Scandinavian Journal of Medicine &amp; Science in Sports</em>, 32:498-511. <a href="https://doi.org/10.1111/sms.14101" target="_blank" rel="noopener">DOI: 10.1111/sms.14101</a> — Results, pp. 503-507 for the PYR&rarr;POL sequencing finding.</div>
+                <div>Treff, G. et al. (2023). Retrospective review of 175 TIDs — <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10641476/" target="_blank" rel="noopener">PMC10641476</a> — see Table 1 for the full pyramidal/polarized/threshold breakdown.</div>
+                <div class="ref-note">Page references are best-effort locators — exact pagination may vary by PDF version/edition.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="model-card" data-model="threshold">
+            <div class="model-title">Threshold</div>
+            <div class="model-tag">Heavy emphasis on "comfortably hard" steady efforts</div>
+            <p class="model-summary">
+              Most training happens right around your lactate threshold, without much truly easy
+              or truly hard work. Common among recreational runners by accident, and the least
+              supported of the three models in head-to-head research.
+            </p>
+            <button class="see-research" data-research="threshold">See research &#9662;</button>
+            <div class="research-panel" data-panel="threshold">
+              <div class="ref-list">
+                <div>Kenneally, M., Casado, A., &amp; Santos-Concejero, J. (2018). <em>IJSPP</em> — systematic review, see Discussion pp. 6-8 for the autonomic nervous system overreaching finding.</div>
+                <div>Treff, G. et al. — <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10641476/" target="_blank" rel="noopener">PMC10641476</a>, Table 1.</div>
+                <div class="ref-note">Page references are best-effort locators — exact pagination may vary by PDF version/edition.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <button class="btn-primary onb-next" id="modelContinueBtn" disabled>Continue</button>
+      </div>
+    </section>
+
+    <!-- Threshold confirmation modal -->
+    <div id="thresholdModal" class="modal hidden">
+      <div class="modal-content">
+        <button class="modal-close" id="closeThresholdModal">&times;</button>
+        <h2>Really?</h2>
+        <p>
+          Across 175 documented elite training distributions, only 8 were threshold-dominant —
+          making it the rarest pattern among athletes performing at a high level. A 2018
+          systematic review concluded that pyramidal and polarized training are both more
+          effective than threshold training, although a few elite marathoners do still use it.
+        </p>
+        <p>
+          The likely reason: this "comfortably hard" zone is demanding enough to require real
+          recovery, but not hard enough to drive the same top-end adaptations as genuine
+          high-intensity work — sometimes called training's "no man's land."
+        </p>
+        <p>
+          One honest caveat: if your weekly training time is limited, splitting time between
+          easy/moderate and moderate/hard with a small dose of fast running may work about as
+          well as a strict polarized split. This isn't a wrong choice — it's just the
+          least-supported default for most runners with room to train more.
+        </p>
+        <div class="modal-actions">
+          <button class="btn-ghost" id="thresholdGoBack">Go back and compare Polarized / Pyramidal</button>
+          <button class="btn-primary" id="thresholdContinueAnyway">Continue with Threshold anyway</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Individual variation -->
+    <section class="onb-screen" data-screen="3">
+      <div class="onb-card onb-card-narrow">
+        <h1>Does my body type or personality affect which model is better for me?</h1>
+        <p class="onb-body">
+          Short answer: there's emerging evidence that people genuinely respond differently to
+          these models, but the strongest known predictor right now isn't a personality or body
+          trait — it's training experience.
+        </p>
+        <p class="onb-body">
+          A 2025 machine-learning study split 120 recreational marathon runners into 16-week
+          pyramidal or polarized groups and found four distinct response patterns: about a third
+          responded better to polarized, about a third responded better to pyramidal, ~19%
+          responded well to either, and ~18% didn't respond strongly to either as structured.
+          Training experience was the strongest predictor of which approach worked best for a
+          given runner.
+        </p>
+        <p class="onb-body">
+          There's also a real physiological difference between the two: pyramidal training tends
+          to produce larger gains in cardiac stroke volume (better efficiency at submaximal
+          effort), while polarized training tends to produce larger VO2max and neuromuscular
+          gains that show up more in the late stages of a race.
+        </p>
+        <p class="onb-body">
+          A practical, low-risk guideline several coaches converge on: newer runners tend to do
+          better starting with a pyramidal approach, since it has more built-in margin for error,
+          and trying a polarized or threshold approach after 6-12 months of consistent pyramidal
+          training.
+        </p>
+        <p class="onb-body onb-bottom-line">
+          <strong>Bottom line:</strong> there's no clean "if you have trait X, pick model Y" rule yet backed by
+          strong evidence. Your training history matters more than we can currently predict from
+          any single physical or personality trait. You can change your model at any time as you
+          gather more data on how you personally respond.
+        </p>
+        <div class="ref-list">
+          <div><em>Scientific Reports</em> (2025), <a href="https://doi.org/10.1038/s41598-025-25369-7" target="_blank" rel="noopener">DOI: 10.1038/s41598-025-25369-7</a> — "Machine learning-based personalized training models for optimizing marathon performance" — see Results, Fig. 3 for the four responder clusters, and Table 6 for the stroke volume/VO2max comparison.</div>
+        </div>
+        <button class="btn-primary onb-next" data-goto="4">Continue</button>
+      </div>
+    </section>
+
+    <!-- Screen 4: Goal setting -->
+    <section class="onb-screen" data-screen="4">
+      <div class="onb-card onb-card-narrow">
+        <h1>Set a goal — but a realistic one</h1>
+        <p class="onb-body">
+          Having a target matters, but the timeline has to match what's actually achievable
+          given how often you can train. Tell us your goal and your weekly availability, and
+          we'll tell you honestly whether the math works.
+        </p>
+
+        <form id="goalForm">
+          <label>Target distance</label>
+          <select id="goalDistance">
+            <option value="5K">5K</option>
+            <option value="10K">10K</option>
+            <option value="Half Marathon">Half Marathon</option>
+            <option value="Marathon">Marathon</option>
+            <option value="Custom">Custom</option>
+          </select>
+
+          <label>Target pace (optional)</label>
+          <div class="pace-row">
+            <input type="number" id="paceMinutes" min="0" step="0.1" placeholder="e.g. 5.5">
+            <select id="paceUnit">
+              <option value="km">min/km</option>
+              <option value="mile">min/mile</option>
+            </select>
+          </div>
+
+          <label>Realistic running days per week: <span id="daysValue">4</span></label>
+          <input type="range" id="daysPerWeek" min="2" max="7" value="4">
+
+          <button type="submit" class="btn-primary" style="width:100%;margin-top:18px;">See my estimate</button>
+        </form>
+
+        <div id="goalResult" class="goal-result hidden"></div>
+
+        <div class="onb-disclaimer">
+          People adapt to training at very different rates depending on starting fitness, age,
+          recovery, sleep, and consistency. The estimate above is a starting point, not a
+          promise. Your plan will adjust automatically based on how your actual runs go — if
+          you're progressing faster or slower than expected, the target timeline will update
+          to match reality rather than forcing you to hit an arbitrary date.
+        </div>
+
+        <button class="btn-primary onb-next hidden" id="finishOnboardingBtn">Go to dashboard</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="/static/onboarding.js"></script>
+</body>
+</html>

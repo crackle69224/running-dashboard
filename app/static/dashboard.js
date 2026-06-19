@@ -282,3 +282,26 @@ async function refreshAll() {
 }
 
 refreshAll();
+
+document.getElementById("settingsBtn").addEventListener("click", () => {
+  const select = document.getElementById("settingsModelSelect");
+  if (window.TRAINING_MODEL) select.value = window.TRAINING_MODEL;
+  document.getElementById("settingsSaved").textContent = "";
+  document.getElementById("settingsModal").classList.remove("hidden");
+});
+document.getElementById("closeSettingsModal").addEventListener("click", () => {
+  document.getElementById("settingsModal").classList.add("hidden");
+});
+document.getElementById("settingsModal").addEventListener("click", (e) => {
+  if (e.target.id === "settingsModal") e.target.classList.add("hidden");
+});
+document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
+  const model = document.getElementById("settingsModelSelect").value;
+  await apiFetch("/api/settings/model", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model }),
+  });
+  window.TRAINING_MODEL = model;
+  document.getElementById("settingsSaved").textContent = "Saved.";
+});

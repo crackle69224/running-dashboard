@@ -15,7 +15,12 @@ from starlette.requests import Request
 from app import auth, db
 from app.email_utils import send_email
 from app.fit_parser import parse_fit_file
+from app.goal_estimate import estimate_goal
 from app.zones import MAX_HR, ZONE_COLORS
+
+TRAINING_MODELS = {"polarized", "pyramidal", "threshold"}
+GOAL_DISTANCES = {"5K", "10K", "Half Marathon", "Marathon", "Custom"}
+MILE_IN_KM = 1.60934
 
 BASE_DIR = Path(__file__).resolve().parent
 IS_PRODUCTION = bool(os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT"))
@@ -40,6 +45,17 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     password: str
+
+
+class ModelSelection(BaseModel):
+    model: str
+
+
+class GoalRequest(BaseModel):
+    distance: str
+    pace_minutes: float | None = None
+    pace_unit: str = "km"
+    days_per_week: int
 
 
 def get_current_user(session: str | None = Cookie(default=None)) -> dict:
@@ -70,9 +86,12 @@ def _set_session_cookie(response, user_id: int):
 def index(request: Request, user: dict | None = Depends(get_current_user_optional)):
     if not user:
         return RedirectResponse("/login")
+    if not user["onboarding_completed_at"]:
+        return RedirectResponse("/onboarding")
     return templates.TemplateResponse("index.html", {
         "request": request, "max_hr": MAX_HR, "zone_colors": ZONE_COLORS,
         "user_email": user["email"], "is_admin": user["is_admin"],
+        "training_model": user["training_model"],
     })
 
 
@@ -173,6 +192,59 @@ def reset_password(req: ResetPasswordRequest):
 @app.get("/api/me")
 def me(user: dict = Depends(get_current_user)):
     return {"email": user["email"], "is_admin": user["is_admin"]}
+
+
+@app.get("/onboarding", response_class=HTMLResponse)
+def onboarding_page(request: Request, user: dict = Depends(get_current_user)):
+    return templates.TemplateResponse("onboarding.html", {"request": request})
+
+
+@app.post("/api/onboarding/model")
+def onboarding_model(req: ModelSelection, user: dict = Depends(get_current_user)):
+    if req.model not in TRAINING_MODELS:
+        raise HTTPException(400, "Unknown training model")
+    db.set_training_model(user["id"], req.model)
+    return {"training_model": req.model}
+
+
+@app.post("/api/onboarding/goal")
+def onboarding_goal(req: GoalRequest, user: dict = Depends(get_current_user)):
+    if req.distance not in GOAL_DISTANCES:
+        raise HTTPException(400, "Unknown goal distance")
+    if not 2 <= req.days_per_week <= 7:
+        raise HTTPException(400, "Days per week must be between 2 and 7")
+    if not user["training_model"]:
+        raise HTTPException(400, "Select a training model first")
+
+    pace_seconds_per_km = None
+    if req.pace_minutes:
+        pace_seconds_per_km = req.pace_minutes * 60
+        if req.pace_unit == "mile":
+            pace_seconds_per_km /= MILE_IN_KM
+
+    db.complete_onboarding(user["id"], req.distance, pace_seconds_per_km, req.pace_unit, req.days_per_week)
+
+    estimate = estimate_goal(req.distance, req.days_per_week)
+    return {**estimate, "training_model": user["training_model"]}
+
+
+@app.get("/api/settings")
+def get_settings(user: dict = Depends(get_current_user)):
+    return {
+        "training_model": user["training_model"],
+        "goal_distance": user["goal_distance"],
+        "goal_pace_seconds_per_km": user["goal_pace_seconds_per_km"],
+        "goal_pace_unit": user["goal_pace_unit"],
+        "goal_days_per_week": user["goal_days_per_week"],
+    }
+
+
+@app.post("/api/settings/model")
+def update_settings_model(req: ModelSelection, user: dict = Depends(get_current_user)):
+    if req.model not in TRAINING_MODELS:
+        raise HTTPException(400, "Unknown training model")
+    db.set_training_model(user["id"], req.model)
+    return {"training_model": req.model}
 
 
 def _parse_and_store(fit_bytes: bytes, filename: str, user_id: int) -> dict:
