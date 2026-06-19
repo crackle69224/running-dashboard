@@ -302,9 +302,8 @@ document.getElementById("changeProgramBtn").addEventListener("click", () => {
 document.getElementById("changePasswordBtn").addEventListener("click", () => {
   document.getElementById("settingsMenu").classList.add("hidden");
   document.getElementById("changePasswordForm").classList.remove("hidden");
-  document.getElementById("currentPassword").value = "";
-  document.getElementById("newPassword").value = "";
   document.getElementById("passwordChangeMsg").textContent = "";
+  document.getElementById("sendChangePasswordEmailBtn").disabled = false;
 });
 
 document.getElementById("backToSettingsMenu").addEventListener("click", () => {
@@ -312,31 +311,18 @@ document.getElementById("backToSettingsMenu").addEventListener("click", () => {
   document.getElementById("settingsMenu").classList.remove("hidden");
 });
 
-document.getElementById("savePasswordBtn").addEventListener("click", async () => {
-  const currentPassword = document.getElementById("currentPassword").value;
-  const newPassword = document.getElementById("newPassword").value;
+document.getElementById("sendChangePasswordEmailBtn").addEventListener("click", async (e) => {
   const msg = document.getElementById("passwordChangeMsg");
-
-  if (newPassword.length < 8) {
-    msg.style.color = "var(--z5)";
-    msg.textContent = "New password must be at least 8 characters.";
-    return;
-  }
-
+  e.target.disabled = true;
   try {
-    const res = await apiFetch("/api/change-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
-    });
+    const res = await apiFetch("/api/request-password-change", { method: "POST" });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Something went wrong");
     msg.style.color = "var(--z3)";
     msg.textContent = data.message;
-    document.getElementById("currentPassword").value = "";
-    document.getElementById("newPassword").value = "";
   } catch (err) {
     msg.style.color = "var(--z5)";
     msg.textContent = err.message;
+    e.target.disabled = false;
   }
 });

@@ -51,7 +51,8 @@ class ModelSelection(BaseModel):
     model: str
 
 
-class ChangePasswordRequest(BaseModel):
+class ConfirmPasswordChangeRequest(BaseModel):
+    token: str
     current_password: str
     new_password: str
 
@@ -244,15 +245,40 @@ def get_settings(user: dict = Depends(get_current_user)):
     }
 
 
-@app.post("/api/change-password")
-def change_password(req: ChangePasswordRequest, user: dict = Depends(get_current_user)):
+@app.get("/change-password", response_class=HTMLResponse)
+def change_password_page(request: Request, token: str = ""):
+    return templates.TemplateResponse("change_password.html", {"request": request, "token": token})
+
+
+@app.post("/api/request-password-change")
+def request_password_change(request: Request, user: dict = Depends(get_current_user)):
+    token = auth.create_reset_token(user["id"], user["password_hash"])
+    change_url = f"{str(request.base_url).rstrip('/')}/change-password?token={token}"
+    send_email(
+        user["email"],
+        "Confirm your RunDash password change",
+        f"Click the link below to set a new password. This link expires in 1 hour.\n\n{change_url}\n\n"
+        "If you didn't request this, you can ignore this email and your password will stay the same.",
+    )
+    return {"message": "Check your email for a link to finish changing your password."}
+
+
+@app.post("/api/confirm-password-change")
+def confirm_password_change(req: ConfirmPasswordChangeRequest):
+    data = auth.decode_reset_token(req.token)
+    if not data:
+        raise HTTPException(400, "This link is invalid or has expired")
+
+    user = db.get_user_by_id(data["user_id"])
+    if not user or user["password_hash"] != data["password_hash"]:
+        raise HTTPException(400, "This link has already been used or is no longer valid")
     if not auth.verify_password(req.current_password, user["password_hash"]):
         raise HTTPException(400, "Current password is incorrect")
     if len(req.new_password) < 8:
         raise HTTPException(400, "New password must be at least 8 characters")
 
     db.update_password(user["id"], auth.hash_password(req.new_password))
-    return {"message": "Password updated."}
+    return {"message": "Password updated. You can now log in with your new password."}
 
 
 def _parse_and_store(fit_bytes: bytes, filename: str, user_id: int) -> dict:
