@@ -234,7 +234,9 @@
 
           <label>Target pace (optional)</label>
           <div class="pace-row">
-            <input type="number" id="paceMinutes" min="0" step="0.1" placeholder="e.g. 5.5">
+            <input type="number" id="paceMin" min="0" step="1" placeholder="MM" class="pace-mm">
+            <span class="pace-colon">:</span>
+            <input type="number" id="paceSec" min="0" max="59" step="1" placeholder="SS" class="pace-ss">
             <select id="paceUnit">
               <option value="km">min/km</option>
               <option value="mile">min/mile</option>
@@ -263,6 +265,9 @@
 
   </div>
 
+  <script>
+    window.CURRENT_MODEL = {{ current_model | tojson }};
+  </script>
   <script src="/static/onboarding.js"></script>
 </body>
 </html>

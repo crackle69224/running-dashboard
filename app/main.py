@@ -196,7 +196,7 @@ def me(user: dict = Depends(get_current_user)):
 
 @app.get("/onboarding", response_class=HTMLResponse)
 def onboarding_page(request: Request, user: dict = Depends(get_current_user)):
-    return templates.TemplateResponse("onboarding.html", {"request": request})
+    return templates.TemplateResponse("onboarding.html", {"request": request, "current_model": user["training_model"]})
 
 
 @app.post("/api/onboarding/model")
@@ -237,14 +237,6 @@ def get_settings(user: dict = Depends(get_current_user)):
         "goal_pace_unit": user["goal_pace_unit"],
         "goal_days_per_week": user["goal_days_per_week"],
     }
-
-
-@app.post("/api/settings/model")
-def update_settings_model(req: ModelSelection, user: dict = Depends(get_current_user)):
-    if req.model not in TRAINING_MODELS:
-        raise HTTPException(400, "Unknown training model")
-    db.set_training_model(user["id"], req.model)
-    return {"training_model": req.model}
 
 
 def _parse_and_store(fit_bytes: bytes, filename: str, user_id: int) -> dict:

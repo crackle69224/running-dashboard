@@ -93,9 +93,10 @@
   font-family: var(--sans);
   font-size: 14px;
 }
-.pace-row { display: flex; gap: 10px; }
-.pace-row input { flex: 1; }
-.pace-row select { width: 130px; }
+.pace-row { display: flex; gap: 8px; align-items: center; }
+.pace-row .pace-mm, .pace-row .pace-ss { width: 64px; text-align: center; flex: none; }
+.pace-row .pace-colon { font-family: var(--mono); font-size: 16px; color: var(--text-dim); }
+.pace-row select { width: 130px; margin-left: 4px; }
 #daysPerWeek { margin-top: 8px; }
 
 .goal-result {

@@ -1,11 +1,22 @@
 let selectedModel = null;
 let pendingThresholdSelect = false;
 
+const urlParams = new URLSearchParams(window.location.search);
+const isSettingsRevisit = urlParams.get("settings") === "1";
+
 function showScreen(n) {
   document.querySelectorAll(".onb-screen").forEach(el => {
     el.classList.toggle("active", el.dataset.screen === String(n));
   });
   window.scrollTo(0, 0);
+}
+
+if (isSettingsRevisit) {
+  showScreen(2);
+  document.getElementById("modelContinueBtn").textContent = "Save";
+}
+if (window.CURRENT_MODEL) {
+  selectModelCard(window.CURRENT_MODEL);
 }
 
 document.querySelectorAll(".onb-next[data-goto]").forEach(btn => {
@@ -59,7 +70,11 @@ document.getElementById("modelContinueBtn").addEventListener("click", async () =
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ model: selectedModel }),
   });
-  showScreen(3);
+  if (isSettingsRevisit) {
+    window.location.href = "/";
+  } else {
+    showScreen(3);
+  }
 });
 
 // --- Screen 4: goal setting ---
@@ -70,7 +85,8 @@ daysSlider.addEventListener("input", () => { daysValue.textContent = daysSlider.
 document.getElementById("goalForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const distance = document.getElementById("goalDistance").value;
-  const paceMinutesRaw = document.getElementById("paceMinutes").value;
+  const paceMinRaw = document.getElementById("paceMin").value;
+  const paceSecRaw = document.getElementById("paceSec").value;
   const paceUnit = document.getElementById("paceUnit").value;
   const daysPerWeek = parseInt(daysSlider.value, 10);
 
@@ -79,7 +95,11 @@ document.getElementById("goalForm").addEventListener("submit", async (e) => {
     pace_unit: paceUnit,
     days_per_week: daysPerWeek,
   };
-  if (paceMinutesRaw) body.pace_minutes = parseFloat(paceMinutesRaw);
+  if (paceMinRaw || paceSecRaw) {
+    const mins = parseInt(paceMinRaw, 10) || 0;
+    const secs = parseInt(paceSecRaw, 10) || 0;
+    body.pace_minutes = mins + secs / 60;
+  }
 
   const res = await fetch("/api/onboarding/goal", {
     method: "POST",
