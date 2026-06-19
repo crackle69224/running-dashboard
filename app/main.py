@@ -162,20 +162,33 @@ def reset_password_page(request: Request, token: str = ""):
     return templates.TemplateResponse("reset_password.html", {"request": request, "token": token})
 
 
+EMAIL_DELIVERY_LIMITED_MESSAGE = (
+    "We couldn't send that email. This site's email sending is currently limited to its "
+    "admin's address while domain verification is pending — please contact the site admin "
+    "directly to reset your password."
+)
+
+
 @app.post("/api/forgot-password")
 def forgot_password(req: ForgotPasswordRequest, request: Request):
     email = req.email.strip().lower()
     user = db.get_user_by_email(email)
-    if user:
-        token = auth.create_reset_token(user["id"], user["password_hash"])
-        reset_url = f"{str(request.base_url).rstrip('/')}/reset-password?token={token}"
+    if not user:
+        # Don't reveal whether the email is registered.
+        return {"message": "If an account with that email exists, a reset link has been sent."}
+
+    token = auth.create_reset_token(user["id"], user["password_hash"])
+    reset_url = f"{str(request.base_url).rstrip('/')}/reset-password?token={token}"
+    try:
         send_email(
             user["email"],
             "Reset your RunDash password",
             f"Click the link below to reset your password. This link expires in 1 hour.\n\n{reset_url}\n\n"
             "If you didn't request this, you can ignore this email.",
         )
-    # Always return success, whether or not the email exists, so we don't leak which emails are registered.
+    except Exception:
+        raise HTTPException(503, EMAIL_DELIVERY_LIMITED_MESSAGE)
+
     return {"message": "If an account with that email exists, a reset link has been sent."}
 
 
@@ -254,12 +267,16 @@ def change_password_page(request: Request, token: str = ""):
 def request_password_change(request: Request, user: dict = Depends(get_current_user)):
     token = auth.create_reset_token(user["id"], user["password_hash"])
     change_url = f"{str(request.base_url).rstrip('/')}/change-password?token={token}"
-    send_email(
-        user["email"],
-        "Confirm your RunDash password change",
-        f"Click the link below to set a new password. This link expires in 1 hour.\n\n{change_url}\n\n"
-        "If you didn't request this, you can ignore this email and your password will stay the same.",
-    )
+    try:
+        send_email(
+            user["email"],
+            "Confirm your RunDash password change",
+            f"Click the link below to set a new password. This link expires in 1 hour.\n\n{change_url}\n\n"
+            "If you didn't request this, you can ignore this email and your password will stay the same.",
+        )
+    except Exception:
+        raise HTTPException(503, EMAIL_DELIVERY_LIMITED_MESSAGE)
+
     return {"message": "Check your email for a link to finish changing your password."}
 
 

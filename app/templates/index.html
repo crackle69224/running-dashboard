@@ -75,14 +75,14 @@
         </div>
       </div>
 
-      <div id="changePasswordForm" class="hidden">
-        <button id="backToSettingsMenu" class="btn-ghost" style="margin-bottom:14px;">&larr; Back</button>
-        <h2 style="margin-top:0;">Change password</h2>
+      <div id="changePasswordConfirm" class="hidden">
+        <h2 style="margin-top:0;">Check your email</h2>
         <p style="font-size:13px;color:var(--text-dim);line-height:1.5;">
-          We'll email you a secure link to finish changing your password — that way it can't
-          be done by anyone who's just sitting at your logged-in browser.
+          We've sent a secure link to <strong id="changePasswordEmailTarget"></strong> to finish
+          changing your password — that way it can't be done by anyone who's just sitting at
+          your logged-in browser.
         </p>
-        <button id="sendChangePasswordEmailBtn" class="btn-primary" style="width:100%;margin-top:8px;">Send me the link</button>
+        <button id="closeChangePasswordConfirm" class="btn-primary" style="width:100%;margin-top:8px;">Got it</button>
         <div id="passwordChangeMsg" style="font-size:12px;margin-top:10px;min-height:14px;"></div>
       </div>
     </div>
@@ -93,6 +93,7 @@
     window.ZONE_COLORS = {{ zone_colors | tojson }};
     window.IS_ADMIN = {{ is_admin | tojson }};
     window.TRAINING_MODEL = {{ training_model | tojson }};
+    window.USER_EMAIL = {{ user_email | tojson }};
   </script>
   <script src="/static/dashboard.js"></script>
 </body>

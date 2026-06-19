@@ -285,7 +285,7 @@ refreshAll();
 
 document.getElementById("settingsBtn").addEventListener("click", () => {
   document.getElementById("settingsMenu").classList.remove("hidden");
-  document.getElementById("changePasswordForm").classList.add("hidden");
+  document.getElementById("changePasswordConfirm").classList.add("hidden");
   document.getElementById("settingsModal").classList.remove("hidden");
 });
 document.getElementById("closeSettingsModal").addEventListener("click", () => {
@@ -299,30 +299,22 @@ document.getElementById("changeProgramBtn").addEventListener("click", () => {
   window.location.href = "/onboarding?settings=1";
 });
 
-document.getElementById("changePasswordBtn").addEventListener("click", () => {
-  document.getElementById("settingsMenu").classList.add("hidden");
-  document.getElementById("changePasswordForm").classList.remove("hidden");
-  document.getElementById("passwordChangeMsg").textContent = "";
-  document.getElementById("sendChangePasswordEmailBtn").disabled = false;
-});
-
-document.getElementById("backToSettingsMenu").addEventListener("click", () => {
-  document.getElementById("changePasswordForm").classList.add("hidden");
-  document.getElementById("settingsMenu").classList.remove("hidden");
-});
-
-document.getElementById("sendChangePasswordEmailBtn").addEventListener("click", async (e) => {
+document.getElementById("changePasswordBtn").addEventListener("click", async () => {
   const msg = document.getElementById("passwordChangeMsg");
-  e.target.disabled = true;
   try {
     const res = await apiFetch("/api/request-password-change", { method: "POST" });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Something went wrong");
-    msg.style.color = "var(--z3)";
-    msg.textContent = data.message;
+    document.getElementById("changePasswordEmailTarget").textContent = window.USER_EMAIL || "your email";
+    document.getElementById("settingsMenu").classList.add("hidden");
+    document.getElementById("changePasswordConfirm").classList.remove("hidden");
+    msg.textContent = "";
   } catch (err) {
     msg.style.color = "var(--z5)";
     msg.textContent = err.message;
-    e.target.disabled = false;
   }
+});
+
+document.getElementById("closeChangePasswordConfirm").addEventListener("click", () => {
+  document.getElementById("settingsModal").classList.add("hidden");
 });
